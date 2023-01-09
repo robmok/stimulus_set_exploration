@@ -1,0 +1,2 @@
+arch_id,short_description,long_description
+0,"arch0","Variational inference using fixed beta=10, free coordinates and a simple empirical prior."
