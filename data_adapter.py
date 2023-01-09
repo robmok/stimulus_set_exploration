@@ -42,6 +42,12 @@ def main(fp_project):
         3: fp_source / Path(
             'stimulus_set_20c', 'sub-00_norming_stimset_20c_sess1-5.pkl'
         ),
+        4: fp_source / Path(
+            'stimulus_set_09', 'sub-00_norming_stimset_9_sess0-5.pkl'
+        ),
+        5: fp_source / Path(
+            'stimulus_set_09', 'sub-00_norming_stimset_9_sess1-5.pkl'
+        ),
     }
 
     for input_id, fp_source_data in source_data.items():
