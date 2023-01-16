@@ -31,6 +31,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import psiz
 # import scipy.stats as st
 # from sklearn.linear_model import LinearRegression
 import tensorflow as tf
@@ -43,6 +44,29 @@ tf.config.run_functions_eagerly(True)
 
 # Uncomment and edit the following to control GPU visibility.
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+
+# TODO DRY with fit script.
+class StochasticBehaviorModel(psiz.keras.StochasticModel):
+    """A behavior model.
+
+    No Gates.
+
+    """
+
+    def __init__(self, behavior=None, **kwargs):
+        """Initialize."""
+        super(StochasticBehaviorModel, self).__init__(**kwargs)
+        self.behavior = behavior
+
+    def call(self, inputs):
+        """Call."""
+        return self.behavior(inputs)
+
+    def get_config(self):
+        """Get configuration."""
+        return super(StochasticBehaviorModel, self).get_config()
 
 
 def analyze_model(fp_project, arch_id, input_id, run_id):
@@ -89,18 +113,11 @@ def analyze_model(fp_project, arch_id, input_id, run_id):
         'idx2coord': idx2coord
     }
 
-    # Get pixel values from filenames.
-    # fp_list = catalog.filepath()
-    # gen_space_arr = []
-    # for i_fp in fp_list:
-    #     fn_float = float(os.fspath(i_fp).split('/')[-1].split(
-    #         'F0Level'
-    #     )[1].split('F1Level')[0])
-    #     gen_space_arr.append(fn_float)
-    # gen_space_arr = np.array(gen_space_arr)
-
     # Load VI model.
-    model = tf.keras.models.load_model(mid.pathname)
+    model = tf.keras.models.load_model(
+        mid.pathname,
+        custom_objects={"StochasticBehaviorModel": StochasticBehaviorModel}
+    )
 
     # Compile settings.
     compile_kwargs = {
@@ -111,13 +128,6 @@ def analyze_model(fp_project, arch_id, input_id, run_id):
         ]
     }
     model.compile(**compile_kwargs)
-
-    # TODO delete
-    # print(
-    #     '    beta: {0:.2f}'.format(
-    #         model.behavior.kernel.similarity.beta.numpy()
-    #     )
-    # )
 
     # Create visual.
     fig = plt.figure(figsize=(6.5, 4), dpi=200)
@@ -150,7 +160,7 @@ def draw_figure(ax, model, n_dim, info):
     if n_dim == 1:
         # loc = np.squeeze(loc)
 
-        # # If necessary, flip model based on what should be the smallest value.
+        # If necessary, flip model based on what should be the smallest value.
         # if loc[2] > 0:
         #     loc = - loc
 
@@ -211,6 +221,26 @@ def draw_figure(ax, model, n_dim, info):
         pass
     elif n_dim == 2:
         # TODO
+        # Center.
+        loc = loc - np.mean(loc, axis=0)
+
+        # Apply Procrustes transformation since our embeddings are rotation
+        # invariant.
+        info['coord2idx']['0.00,0.00']
+
+        loc_ideal = []
+        for key, value in info['idx2coord'].items():
+            parts = value.split(',')
+            x = float(parts[0])
+            y = float(parts[1])
+            loc_ideal.append([x, y])
+        loc_ideal = np.array(loc_ideal)
+        loc_ideal = loc_ideal - np.mean(loc_ideal, axis=0)
+        r = psiz.utils.procrustes_rotation(
+            loc, loc_ideal, scale=False
+        )
+        loc = np.matmul(loc, r)
+
         ax.scatter(
             loc[:, 0], loc[:, 1], s=2
         )

@@ -36,6 +36,7 @@ tf.config.run_functions_eagerly(True)
 
 # Uncomment and edit the following to control GPU visibility.
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 class StochasticBehaviorModel(psiz.keras.StochasticModel):
@@ -54,12 +55,15 @@ class StochasticBehaviorModel(psiz.keras.StochasticModel):
         """Call."""
         return self.behavior(inputs)
 
+    def get_config(self):
+        """Get configuration."""
+        return super(StochasticBehaviorModel, self).get_config()
 
-def infer_model(fp_project, arch_id, input_id):
+
+def infer_model(fp_project, arch_id, input_id, split):
     """Infer model."""
     # Settings.
     n_stimuli = 25
-    split = -1  # TODO
     n_dim = 2
     epochs = 10000
     batch_size = 128
@@ -308,6 +312,10 @@ if __name__ == "__main__":
         help='Integer indicating the input ID. Will default to `0`'
     )
     parser.add_argument(
+        '--split', type=int, default=-1,
+        help='Integer indicating the split. Will default to `-1`'
+    )
+    parser.add_argument(
         '--gpu', type=int, default=-1,
         help='Integer indicating GPU to use. Will default to CPU only.'
     )
@@ -317,4 +325,4 @@ if __name__ == "__main__":
     else:
         os.environ["CUDA_VISIBLE_DEVICES"] = "{0}".format(args.gpu)
 
-    infer_model(fp_project, args.arch_id, args.input_id)
+    infer_model(fp_project, args.arch_id, args.input_id, args.split)
