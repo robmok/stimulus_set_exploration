@@ -25,6 +25,7 @@ Example GPU usage:
 """
 
 import argparse
+import copy
 import os
 from pathlib import Path
 
@@ -136,8 +137,7 @@ def analyze_model(fp_project, arch_id, input_id, run_id):
     # Plot embeddings.
     ax = fig.add_subplot(gs[0, 0])
     draw_figure(ax, model, n_dim, info)
-    # ax.set_title('Embeddings (95% HDI)')
-    ax.set_title('{}'.format(title_str))
+    ax.set_title('Embeddings (95% HDI)\n{}'.format(title_str))
     gs.tight_layout(fig)
     plt.savefig(
         os.fspath(fp_fig), format='tiff', bbox_inches="tight", dpi=300
@@ -239,7 +239,11 @@ def draw_figure(ax, model, n_dim, info):
         r = psiz.utils.procrustes_rotation(
             loc, loc_ideal, scale=False
         )
-        loc = np.matmul(loc, r)
+
+        loc, cov = apply_affine(loc, cov, r)
+        psiz.mplot.hdi_bvn(
+            loc, cov, ax, p=.99, edgecolor='b', fill=False
+        )
 
         ax.scatter(
             loc[:, 0], loc[:, 1], s=2
@@ -255,7 +259,6 @@ def draw_figure(ax, model, n_dim, info):
     ax.set_xlim(z_limits)
     ax.set_ylim(z_limits)
     ax.set_aspect('equal')
-    # ax.set_title('Embeddings (95% HDI)')  TODO
 
 
 def unpack_mvn(dist):
@@ -279,6 +282,20 @@ def unpack_mvn(dist):
     cov = diag_to_full_cov(v)
 
     return loc, cov
+
+
+def apply_affine(loc, cov, r=None, t=None):
+    """Apply affine transformation to set of MVN."""
+    n_dist = loc.shape[0]
+    loc_a = copy.copy(loc)
+    cov_a = copy.copy(cov)
+
+    for i_dist in range(n_dist):
+        loc_a[i_dist], cov_a[i_dist] = psiz.utils.affine_mvn(
+            loc[np.newaxis, i_dist], cov[i_dist], r, t
+        )
+
+    return loc_a, cov_a
 
 
 def apply_plt_settings():
