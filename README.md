@@ -1,5 +1,10 @@
 Author: Brett D. Roads
 
+---
+**WARNING:** This package is pre-release and the API is not stable. All APIs are subject to change and all releases are alpha.
+
+---
+
 # Purpose 
 
 To explore the properties of candidate stimulus sets.
