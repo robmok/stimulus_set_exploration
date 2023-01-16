@@ -27,7 +27,7 @@ from utils.create_coordinate_index_map import create_coordinate_index_map
 def main(fp_project):
     """Run script."""
     # Settings.
-    fp_source = fp_project / Path('assets', 'data', 'source')
+    fp_source = fp_project / Path('assets', 'data', 'sources')
     fp_ds = fp_project / Path('assets', 'data', 'datasets')
     source_data = {
         0: fp_source / Path(
@@ -47,6 +47,12 @@ def main(fp_project):
         ),
         5: fp_source / Path(
             'stimulus_set_09', 'sub-00_norming_stimset_9_sess1-5.pkl'
+        ),
+        6: fp_source / Path(
+            'stimulus_set_20c', 'sub-00_norming_stimset_20c_sess0-10.pkl'
+        ),
+        7: fp_source / Path(
+            'stimulus_set_20c', 'sub-00_norming_stimset_20c_sess1-10.pkl'
         ),
     }
 
