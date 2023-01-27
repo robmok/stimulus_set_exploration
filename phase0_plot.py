@@ -313,7 +313,9 @@ def apply_plt_settings():
 
 
 if __name__ == "__main__":
-    fp_project = Path.home() / Path('projects', 'rob_mok', 'exploration')
+    # fp_project = Path.home() / Path('projects', 'rob_mok', 'exploration')
+    fp_project = Path.home() / Path('Documents', 'GitHub',
+                                    'stimulus_set_exploration')
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--arch_id', type=int, default=0,
